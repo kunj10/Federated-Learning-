@@ -1,127 +1,128 @@
-﻿
-# Federated Learning Simulation — Logistic Regression on Iris
+# 🌐 Federated Learning Simulator — Logistic Regression on Iris
 
-**A compact, human-friendly Federated Learning (FL) demo that simulates multiple clients training local models, Federated Averaging (FedAvg) aggregation, and node failures & recoveries.**
-
----
-
-## Project Overview
-
-This project is a minimal, well-structured implementation of a Federated Learning simulation using the classic Iris dataset. It demonstrates the core ideas behind FL in an approachable way:
-
-- multiple nodes (clients) train local `LogisticRegression` models on private subsets of the data;
-- a central orchestrator aggregates model parameters using **Federated Averaging (FedAvg)**;
-- random node failures and recoveries are simulated to mimic real-world unreliability;
-- a centralized baseline model is trained on the full dataset for comparison;
-- optional non-IID data splitting and plotting of accuracy over rounds are supported.
-
-This repository is modular and written to look and feel like a real project you would put into a portfolio or share with teammates.
+A compact, hands-on demo of **Federated Learning (FL)**, showing how multiple nodes train local models, aggregate them via **Federated Averaging (FedAvg)**, and handle real-world challenges like node failures and recoveries.
 
 ---
 
-## Key Features
+## 🚀 Project Overview
 
-- **Simple FL simulation** with clear separation between clients and server.
-- **FedAvg** implementation using weighted averaging by local dataset size.
-- **Node failure & recovery simulation** with per-round events.
-- **Centralized baseline** (Logistic Regression on full training set) for comparison.
-- **Global scaling** to ensure consistent preprocessing across nodes.
-- **Optional non-IID splitting** to emulate heterogeneous client distributions.
-- **Plotting utility** to visualize global accuracy across rounds and annotate failure events.
-- **Modular, multi-file structure** with good defaults and configuration.
+This project is a minimal yet complete simulation of Federated Learning built on the classic **Iris dataset**. It demonstrates the core principles of FL in a friendly, modular way:
 
----
+* Train local `LogisticRegression` models on private data at multiple simulated clients (nodes).
+* Use **FedAvg** to aggregate parameters across nodes.
+* Simulate node failures and recoveries to reflect real-world unreliability.
+* Compare the federated model with a centralized baseline trained on the full dataset.
+* Optionally create non-IID splits to mimic heterogeneous client distributions.
+* Visualize accuracy trends and failure events with intuitive plots.
 
-## Technical Architecture
-
-The codebase is split into logical modules:
-
-- `main.py` — entry point. Creates the simulator and runs the experiment.
-- `config.py` — central place to set seeds, node counts, rounds, failure rate, and toggles like `NON_IID`.
-- `node.py` — `FederatedNode` class. Each node holds local data and trains a local `LogisticRegression` model.
-- `simulator.py` — `FederatedLearningSimulator` class. Responsible for data preparation, simulating rounds, node failure logic, FedAvg, evaluation, and logging.
-- `utils.py` — helper utilities (logger setup, seeding helper, plotting).
-- `requirements.txt` — minimal dependency list.
-
-**Data flow (high-level)**
-1. `simulator._prepare_data()` loads Iris, splits train/test, fits a **global scaler**, scales data and partitions the training set across nodes (IID or non-IID).
-2. Each round:
-   - the simulator randomly marks nodes as failed or recovered (based on `FAILURE_RATE`);
-   - active nodes run `train_local_model()` and return their model parameters (`coef_` & `intercept_`) and local `data_size`;
-   - server runs `federated_averaging()` (FedAvg) to compute a new `global_weights`;
-   - the aggregated model is evaluated on the globally scaled test set;
-   - logs and round stats are recorded.
-3. After all rounds, a centralized model is trained on the full (scaled) training set and compared to federated results.
-
-**Why FedAvg?** FedAvg computes a weighted average of client parameters using each client's sample count as weights. It's the standard baseline aggregation method in Federated Learning and works well for small simulations.
+This repository is structured to feel like a real portfolio project, ready for sharing with teammates or using in presentations.
 
 ---
 
-## Installation Instructions
+## ✨ Key Features
 
-Two options are provided below: **uv** (if you use the `uv` tool) and the classic **virtualenv + pip** approach. Both produce the same environment.
+* **Clean FL simulation:** Clearly separates clients and server logic.
+* **FedAvg aggregation:** Weighted averaging using local dataset sizes.
+* **Node failure & recovery:** Random per-round events to test robustness.
+* **Centralized baseline:** Train on the full dataset for comparison.
+* **Global preprocessing:** Ensures consistent scaling across nodes.
+* **Non-IID splits:** Simulate realistic heterogeneous distributions.
+* **Accuracy visualization:** Plots global performance across rounds with annotations for node failures.
+* **Modular architecture:** Easy to extend and experiment with.
 
-### Option A — Using `uv` (recommended if you have it)
+---
+
+## 🏗 Technical Architecture
+
+### Project Structure
+
+```
+federated_learning/
+│
+├─ main.py             # Entry point to run the simulation
+├─ config.py           # Set parameters: nodes, rounds, failure rate, non-IID toggle
+├─ node.py             # Defines FederatedNode class (local model + training)
+├─ simulator.py        # Core simulator: data prep, FedAvg, failure logic, evaluation
+├─ utils.py            # Helper functions: logging, plotting, seeding
+├─ requirements.txt    # Minimal dependencies
+```
+
+### Data Flow Overview
+
+1. **Data Preparation**
+
+   * Load Iris dataset → split train/test → fit global scaler → distribute training set across nodes (IID or non-IID).
+
+2. **Federated Training (per round)**
+
+   * Simulate node failures and recoveries.
+   * Active nodes train local models and send back weights + local dataset size.
+   * Server performs FedAvg to compute global weights.
+   * Evaluate global model on the scaled test set.
+   * Log round stats (accuracy, active nodes, failures).
+
+3. **Centralized Comparison**
+
+   * Train a single logistic regression on the full dataset.
+   * Compare federated vs centralized accuracy and visualize trends.
+
+**Why FedAvg?**
+FedAvg computes a weighted average of client parameters using the number of samples per client as weights. It is the standard baseline aggregation technique in Federated Learning and is especially effective for small-scale simulations like this.
+
+---
+
+## 🛠 Installation
+
+### Option A — Using `uv` (if installed)
+
 ```bash
-# Install uv (if you don't have it already)
 pip install uv
 
-# Go to the project directory
 cd federated_learning
-
-# Create uv-managed virtual environment
 uv venv
-
-# Activate it (Linux/macOS)
-source .venv/bin/activate
-# Windows (PowerShell)
-.venv\Scripts\Activate.ps1
-
-# Install dependencies
+source .venv/bin/activate      # Linux/macOS
+.venv\Scripts\Activate.ps1     # Windows
 uv pip install -r requirements.txt
-
-# Run the simulation
 uv run main.py
 ```
 
-### Option B — Using venv + pip
+### Option B — Standard `venv` + `pip`
+
 ```bash
-# Create and activate a virtual environment (Linux/macOS)
 python -m venv .venv
-source .venv/bin/activate
-
-# Windows (PowerShell)
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-
-# Install dependencies
+source .venv/bin/activate      # Linux/macOS
+.venv\Scripts\Activate.ps1     # Windows
 pip install -r requirements.txt
-
-# Run the simulation
 python main.py
 ```
 
+### Dependencies
+
+* numpy
+* scikit-learn
+* matplotlib
+
 ---
 
-## Usage Guide
+## 🎯 Usage Guide
 
-**Basic run**
+Run the simulation:
 
-Just run `python main.py` (or `uv run main.py` if using `uv`). The default parameters are loaded from `config.py`.
+```bash
+python main.py
+```
 
-**Configurable options**
+### Customize via `config.py`:
 
-Edit `config.py` to tune the experiment quickly:
+| Parameter    | Description                                |
+| ------------ | ------------------------------------------ |
+| N_NODES      | Number of nodes/clients                    |
+| N_ROUNDS     | Number of FL rounds                        |
+| FAILURE_RATE | Node failure probability per round         |
+| NON_IID      | Use non-IID data distribution (True/False) |
+| PLOT_RESULTS | Display accuracy plots                     |
 
-- `N_NODES` (int) — number of nodes (clients) to simulate (3–4 recommended for the assignment).
-- `N_ROUNDS` (int) — number of federated training rounds.
-- `FAILURE_RATE` (float in `[0,1]`) — per-node probability of failing in a round.
-- `NON_IID` (bool) — toggle non-IID partitioning (True yields contiguous label blocks per node).
-- `PLOT_RESULTS` (bool) — whether to show the accuracy plot at the end.
-
-**Examples**
-
-Run 20 rounds with 3 nodes and stronger failures:
+**Example: Stronger failures over 20 rounds**
 
 ```python
 # config.py
@@ -130,80 +131,68 @@ N_ROUNDS = 20
 FAILURE_RATE = 0.4
 ```
 
-Then:
+**Output:**
 
-```bash
-python main.py
-```
-
-**What you’ll see:**
-- Per-round logs: which nodes are active/inactive, local accuracies, aggregation events, and the global accuracy.
-- A final summary comparing federated vs centralized accuracy.
-- A plot showing the global accuracy across rounds and annotated failure events (if enabled).
+* Logs showing active/inactive nodes per round
+* Local accuracies and FedAvg aggregation events
+* Global accuracy trends
+* Optional plot annotated with failures
 
 ---
 
-## Dependencies
+## 📊 Visualization
 
-This project uses a minimal set of widely used scientific Python packages:
+The project includes **matplotlib plots** to visualize:
 
-- `numpy` — numerical arrays and utilities
-- `scikit-learn` — models and metrics (`LogisticRegression`, `train_test_split`, `StandardScaler`)
-- `matplotlib` — plotting accuracy curves
+* Global accuracy across rounds
+* Failed node events
+* Comparison between federated and centralized models
 
-Install everything via:
-```bash
-pip install -r requirements.txt
-```
-
-`requirements.txt` content:
-```
-numpy
-scikit-learn
-matplotlib
-```
-## Contribution Guidelines
-
-This project welcomes contributions! If you want to improve or extend the simulation, please follow these simple steps:
-
-1. Fork the repository and create a branch: `feature/your-idea`.
-2. Keep code style consistent: small, readable functions; docstrings for public functions/classes; type hints where useful.
-3. Add tests (if applicable) and update `README.md` with usage examples for new features.
-4. Open a pull request with a clear description of changes and a short demo/expected output.
-
-**Ideas for contributions**
-- Implement `SGDClassifier + partial_fit` to simulate warm-start local updates.
-- Add CSV logging and an experiment results folder.
-- Add a CLI (argparse) to control `config` values without editing `config.py`.
+**Example plot idea:**
+A line for global accuracy with red dots marking failed nodes.
 
 ---
 
-## License
+## 🤝 Contribution Guidelines
 
-This repository is provided under the **MIT License** — feel free to use and adapt it for educational and non-commercial projects. Add a `LICENSE` file with the MIT text if you plan to publish the repo.
+We welcome contributions!
 
----
+1. Fork & branch: `feature/your-idea`
+2. Maintain consistent code style & add docstrings
+3. Add tests & update README if needed
+4. Open a pull request with clear description & expected output
 
-## Practical Use Cases
+**Ideas:**
 
-- Teaching the core concepts of Federated Learning to students.
-- Demonstrating the effect of client heterogeneity (non-IID data) on global model performance.
-- A starting point for researching aggregation strategies and robustness to client failures.
-
----
-
-## Final Notes — Why this Project?
-
-This small but complete project gives you a controlled environment to explore important FL questions: how to combine models trained on private data, what happens when some nodes go offline, and how the federated model compares to centralized training. It's purposely simple so you can extend it quickly while still being realistic enough to reflect common FL challenges.
-
-If you want, I can also:
-
-- produce a ready-to-upload ZIP of the full project structure, or
-- add a small tutorial notebook (`notebook.ipynb`) that runs experiments and visualizes results interactively, or
-- add an argument parser (`argparse`) so you can control runs from the command line.
+* Implement `SGDClassifier` + `partial_fit` for warm-start updates
+* Add CSV logging for experiments
+* Add CLI (argparse) for runtime configuration
 
 ---
 
-*Happy federating — tell me which extras you'd like and I’ll add them.*
+## 📄 License
 
+MIT License — free for educational or personal use. Add a LICENSE file if sharing publicly.
+
+---
+
+## 💡 Practical Use Cases
+
+* Teach federated learning basics to students
+* Explore impact of client heterogeneity on global performance
+* Test robustness of aggregation strategies under node failures
+
+---
+
+## ✨ Why This Project?
+
+This project provides a controlled, hands-on environment to explore real FL questions:
+
+* How to combine models trained on private data
+* Effects of offline clients
+* Performance comparison: federated vs centralized models
+
+It’s simple, modular, and perfect for experimentation or teaching.
+
+---
 
