@@ -1,4 +1,3 @@
-# utils.py
 from typing import List, Dict
 import matplotlib.pyplot as plt
 import numpy as np

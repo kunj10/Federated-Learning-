@@ -1,4 +1,3 @@
-# simulator.py
 from typing import List, Dict, Optional, Tuple
 import numpy as np
 from sklearn.datasets import load_iris

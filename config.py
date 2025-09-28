@@ -1,4 +1,3 @@
-# config.py
 # Simple configuration for the federated learning simulation
 
 RANDOM_SEED = 42

@@ -1,4 +1,3 @@
-
 from simulator import FederatedLearningSimulator
 import config
 from utils import setup_logger
